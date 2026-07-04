@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pacific Northwest Park Species Calendar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --paper:#EFE8D6;
+    --paper-2:#E6DCC2;
+    --paper-3:#DED1AE;
+    --ink:#2B2A22;
+    --ink-soft:#5C574A;
+    --ink-faint:#8A8474;
+    --moss:#4B5D3A;
+    --moss-dark:#33401F;
+    --rust:#A85332;
+    --rust-dark:#7C3B21;
+    --teal:#2E5C60;
+    --gold:#B8863F;
+    --line:rgba(43,42,34,0.16);
+    --line-strong:rgba(43,42,34,0.32);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,sans-serif;
+    line-height:1.5;
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(75,93,58,0.05) 0, transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(168,83,50,0.05) 0, transparent 45%);
+  }
+
+  ::selection{background:var(--gold);color:var(--paper);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:2.5rem 1.75rem 5rem;}
+
+  /* ---------- header ---------- */
+  header.hero{
+    position:relative;
+    padding:2.25rem 2rem 2rem;
+    margin-bottom:2rem;
+    border:1px solid var(--line-strong);
+    background:var(--paper-2);
+    overflow:hidden;
+  }
+  header.hero svg.contours{position:absolute;inset:0;width:100%;height:100%;opacity:0.35;pointer-events:none;}
+  header.hero .content{position:relative;z-index:1;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--rust-dark);
+    margin:0 0 0.6rem;
+    font-weight:500;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(28px,4vw,42px);
+    letter-spacing:-0.01em;
+    margin:0 0 0.5rem;
+    color:var(--ink);
+  }
+  header.hero p.sub{
+    max-width:640px;
+    color:var(--ink-soft);
+    font-size:15px;
+    margin:0;
+  }
+
+  /* ---------- region tabs ---------- */
+  .region-tabs{display:flex;gap:0.4rem;margin:1.9rem 0 1rem;flex-wrap:wrap;}
+  .region-tab{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:0.5rem 0.95rem;
+    border:1px solid var(--line-strong);
+    background:transparent;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-radius:2px;
+  }
+  .region-tab.active{background:var(--moss);color:var(--paper);border-color:var(--moss-dark);}
+  .region-tab:hover:not(.active){background:rgba(75,93,58,0.08);}
+
+  /* ---------- search ---------- */
+  .search-row{position:relative;margin-bottom:1.6rem;}
+  .search-row input{
+    width:100%;
+    padding:0.75rem 1rem;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    border:1px solid var(--line-strong);
+    background:#FBF8EF;
+    color:var(--ink);
+    outline:none;
+  }
+  .search-row input:focus{border-color:var(--moss);}
+  .search-results{
+    position:absolute;top:calc(100% + 4px);left:0;right:0;
+    background:#FBF8EF;border:1px solid var(--line-strong);
+    max-height:260px;overflow-y:auto;z-index:20;
+    display:none;
+  }
+  .search-results.show{display:block;}
+  .search-result-item{
+    padding:0.6rem 0.9rem;cursor:pointer;font-size:13.5px;
+    border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;gap:1rem;
+  }
+  .search-result-item:hover{background:rgba(75,93,58,0.08);}
+  .search-result-item .meta{color:var(--ink-faint);font-size:12px;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+
+  /* ---------- shortlist grid ---------- */
+  .state-select-row{display:flex;align-items:center;gap:0.6rem;margin:0 0 0.9rem;}
+  .state-select-row label{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);}
+  .state-select-row select{
+    padding:0.5rem 0.8rem;font-size:13.5px;
+    border:1px solid var(--line-strong);background:#FBF8EF;color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .park-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:0.7rem;
+    margin-bottom:0.5rem;
+  }
+  .park-card{
+    border:1px solid var(--line-strong);
+    background:#FBF8EF;
+    padding:0.9rem 1rem 0.85rem;
+    cursor:pointer;
+    position:relative;
+    transition:border-color 0.15s;
+  }
+  .park-card:hover{border-color:var(--moss);}
+  .park-card.selected{border-color:var(--rust);background:#F6ECD9;}
+  .park-card .pname{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:15.5px;
+    margin:0 0 0.35rem;
+    padding-right:1.2rem;
+  }
+  .park-card .pcount{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+  }
+  .park-card .pcount b{color:var(--moss-dark);font-weight:600;}
+  .park-card .pcount.loading{color:var(--ink-faint);font-style:italic;}
+
+  /* ---------- selected park panel ---------- */
+  .panel{
+    border:1px solid var(--line-strong);
+    background:#FBF8EF;
+    margin-top:2rem;
+    display:none;
+  }
+  .panel.show{display:block;}
+  .panel-head{
+    padding:1.3rem 1.5rem 1.1rem;
+    border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;
+  }
+  .panel-head h2{
+    font-family:'Fraunces',serif;font-weight:600;font-size:23px;margin:0 0 0.25rem;
+  }
+  .panel-head .stats{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink-soft);}
+  .panel-head a{color:var(--rust-dark);text-decoration:none;font-size:12.5px;font-family:'JetBrains Mono',monospace;border-bottom:1px solid var(--rust-dark);}
+
+  .progress-wrap{padding:0 1.5rem;margin-top:0.9rem;display:none;}
+  .progress-wrap.show{display:block;}
+  .progress-label{font-size:12.5px;color:var(--ink-soft);margin-bottom:0.35rem;font-family:'JetBrains Mono',monospace;}
+  .progress-bar-track{height:5px;background:var(--paper-3);width:100%;}
+  .progress-bar-fill{height:100%;background:var(--moss);width:0%;transition:width 0.2s;}
+
+  /* ---------- controls ---------- */
+  .controls{
+    display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;
+    padding:1.1rem 1.5rem;
+  }
+  .controls input[type=text]{
+    flex:1;min-width:180px;
+    padding:0.55rem 0.8rem;font-size:13.5px;
+    border:1px solid var(--line-strong);background:#fff;color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .controls select{
+    padding:0.55rem 0.8rem;font-size:13.5px;
+    border:1px solid var(--line-strong);background:#fff;color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .controls .count-tag{
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);
+    margin-left:auto;
+  }
+
+  /* ---------- calendar table ---------- */
+  .cal-scroll{overflow-x:auto;padding:0 1.5rem 1.6rem;}
+  table.cal{border-collapse:collapse;font-size:12.5px;min-width:1080px;width:100%;}
+  table.cal thead th{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:500;font-size:10.5px;letter-spacing:0.03em;text-transform:uppercase;
+    color:var(--ink-soft);
+    text-align:center;
+    padding:0.3rem 0 0.4rem;
+    border-bottom:1px solid var(--line-strong);
+  }
+  table.cal thead th.month-head{border-left:1px solid var(--line);}
+  table.cal thead tr.sub th{
+    font-size:8.5px;font-weight:400;color:var(--ink-faint);padding-bottom:0.5rem;text-transform:none;letter-spacing:0;
+  }
+  th.sp-col, td.sp-col{
+    position:sticky;left:0;background:#FBF8EF;
+    text-align:left;min-width:230px;max-width:230px;
+    padding:0.5rem 0.8rem 0.5rem 0;
+    border-right:1px solid var(--line-strong);
+    z-index:2;
+  }
+  table.cal tbody tr:nth-child(even) td.sp-col{background:#F4EEDD;}
+  table.cal tbody tr:nth-child(even) td{background:#F4EEDD;}
+  .sp-name{font-family:'Fraunces',serif;font-weight:500;font-size:13.5px;display:block;color:var(--ink);}
+  .sp-sci{font-style:italic;color:var(--ink-faint);font-size:11px;display:block;}
+  .sp-taxon-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px;}
+  .sp-count{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);display:block;margin-top:2px;}
+
+  td.cell{
+    width:16px;height:26px;padding:0;border-left:1px solid rgba(43,42,34,0.05);
+    cursor:default;
+  }
+  td.cell.month-start{border-left:1px solid var(--line);}
+  .cell-fill{width:100%;height:100%;}
+  .cell-empty{background:transparent;}
+
+  .row-loading td.cell{background:repeating-linear-gradient(45deg,rgba(43,42,34,0.03),rgba(43,42,34,0.03) 4px,transparent 4px,transparent 8px);}
+
+  .legend{
+    display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;
+    padding:0 1.5rem 1.4rem;font-size:11.5px;color:var(--ink-soft);
+  }
+  .legend .swatches{display:flex;align-items:center;gap:2px;}
+  .legend .sw{width:14px;height:14px;}
+  .legend .taxon-key{display:flex;gap:1rem;flex-wrap:wrap;}
+  .legend .taxon-key span{display:flex;align-items:center;gap:5px;}
+
+  .note{
+    padding:0.9rem 1.5rem 1.4rem;
+    font-size:12.5px;color:var(--ink-faint);
+    border-top:1px solid var(--line);
+    font-style:italic;
+  }
+
+  .empty-state{
+    padding:3rem 1.5rem;text-align:center;color:var(--ink-faint);font-size:14px;
+  }
+
+  footer{margin-top:2.5rem;font-size:12px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;text-align:center;}
+
+  @media (max-width:640px){
+    .wrap{padding:1.5rem 1rem 3rem;}
+    .park-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <svg class="contours" viewBox="0 0 800 200" preserveAspectRatio="none">
+      <path d="M0,150 Q100,100 200,140 T400,120 T600,150 T800,110" fill="none" stroke="#4B5D3A" stroke-width="1"/>
+      <path d="M0,170 Q100,125 200,160 T400,145 T600,170 T800,135" fill="none" stroke="#4B5D3A" stroke-width="1"/>
+      <path d="M0,190 Q100,150 200,180 T400,170 T600,190 T800,160" fill="none" stroke="#A85332" stroke-width="1"/>
+    </svg>
+    <div class="content">
+      <p class="eyebrow">Field guide &mdash; live iNaturalist data</p>
+      <h1>North American species calendar</h1>
+      <p class="sub">Browse parks across Washington, Oregon, and British Columbia, or jump to any county in the United States. For each species with more than 10 recorded observations, this pulls the underlying dates from iNaturalist and lays out when it's actually been seen &mdash; broken into early, mid, and late thirds of each month, with an optional growth-stage view for plants.</p>
+    </div>
+  </header>
+
+  <div class="region-tabs" id="scopeTabs"></div>
+
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="Search for any park or county &mdash; e.g. &ldquo;Deception Pass&rdquo;, &ldquo;Whatcom County&rdquo;, &ldquo;Travis County, Texas&rdquo;&hellip;" autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div id="parksScope">
+    <div class="region-tabs" id="regionTabs"></div>
+    <div class="park-grid" id="parkGrid"></div>
+  </div>
+
+  <div id="countiesScope" style="display:none;">
+    <div class="state-select-row">
+      <label for="stateSelect">State</label>
+      <select id="stateSelect"></select>
+    </div>
+    <div class="park-grid" id="countyGrid"></div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="panel-head">
+      <div>
+        <h2 id="panelTitle">&mdash;</h2>
+        <div class="stats" id="panelStats"></div>
+      </div>
+      <a id="panelLink" href="#" target="_blank" rel="noopener">View on iNaturalist &#8599;</a>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label" id="progressLabel">Loading species&hellip;</div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="controls" id="controlsRow" style="display:none;">
+      <input type="text" id="filterName" placeholder="Filter species by name&hellip;">
+      <select id="filterTaxon">
+        <option value="">All groups</option>
+      </select>
+      <select id="sortMode">
+        <option value="count">Sort: most observed</option>
+        <option value="name">Sort: name (A&ndash;Z)</option>
+        <option value="peak">Sort: peak month</option>
+      </select>
+      <select id="viewMode">
+        <option value="activity">View: observation activity</option>
+        <option value="phenology">View: growth stage (plants)</option>
+      </select>
+      <span class="count-tag" id="speciesCountTag"></span>
+    </div>
+
+    <div class="cal-scroll" id="calScroll" style="display:none;">
+      <table class="cal" id="calTable"></table>
+    </div>
+
+    <div class="legend" id="legendRow" style="display:none;">
+      <span id="legendLabel">Intensity (share of this species' observations):</span>
+      <div class="swatches" id="intensitySwatches"></div>
+      <div class="taxon-key" id="taxonKey"></div>
+    </div>
+
+    <div class="note" id="noteRow" style="display:none;"></div>
+  </div>
+
+  <div class="empty-state" id="emptyState">Pick a park or county above, or search for one, to build its species calendar.</div>
+
+  <footer>Data via api.inaturalist.org &middot; research-grade observations &middot; species phenology sampled from up to 150 most recent dated records per species</footer>
+</div>
+
+<script>
+(function(){
+
+var API = 'https://api.inaturalist.org/v1';
+
+var REGIONS = {
+  WA: {
+    label: 'Washington',
+    parks: [
+      'Discovery Park, Seattle, WA',
+      'Deception Pass State Park, WA',
+      'Olympic National Park, WA',
+      'Mount Rainier National Park, WA',
+      'North Cascades National Park, WA',
+      'Nisqually National Wildlife Refuge, WA',
+      'Bellevue Botanical Garden, WA',
+      'Larrabee State Park, WA'
+    ]
+  },
+  OR: {
+    label: 'Oregon',
+    parks: [
+      'Forest Park, Portland, OR',
+      'Tryon Creek State Natural Area, OR',
+      'Crater Lake National Park, OR',
+      'Smith Rock State Park, OR',
+      'Silver Falls State Park, OR',
+      'Powell Butte Nature Park, Portland, OR'
+    ]
+  },
+  BC: {
+    label: 'British Columbia',
+    parks: [
+      'Stanley Park, Vancouver, BC',
+      'Pacific Spirit Regional Park, BC',
+      'Lighthouse Park, West Vancouver, BC',
+      'Golden Ears Provincial Park, BC',
+      'Garry Point Park, Richmond, BC',
+      'Manning Provincial Park, BC'
+    ]
+  }
+};
+
+var TAXON_COLORS = {
+  'Aves':'#2E5C60','Plantae':'#4B5D3A','Insecta':'#B8863F','Fungi':'#A85332',
+  'Mammalia':'#6B4A2E','Reptilia':'#7A7A3D','Amphibia':'#3D7A6B','Arachnida':'#7C3B21',
+  'Mollusca':'#6A5A8C','Actinopterygii':'#2E6B8C','Chromista':'#5A8C6A','Protozoa':'#8C5A7A',
+  'Animalia':'#5C574A', 'unknown':'#8A8474'
+};
+function taxonColor(t){ return TAXON_COLORS[t] || TAXON_COLORS.unknown; }
+
+var PHENOLOGY_ATTR_ID = 12;
+var PHENOLOGY_VALUE_MAP = {
+  13: 'flowering',
+  14: 'fruiting',
+  15: 'budding',
+  21: 'vegetative'
+};
+var PHENOLOGY_STAGES = ['budding','flowering','fruiting','vegetative'];
+var PHENOLOGY_COLORS = {
+  budding:'#9C9A4C',
+  flowering:'#B8456B',
+  fruiting:'#8C4A2E',
+  vegetative:'#4B5D3A'
+};
+var PHENOLOGY_LABELS = {
+  budding:'Flower budding',
+  flowering:'Flowering',
+  fruiting:'Fruiting',
+  vegetative:'Vegetative / leafing (no flowers seen)'
+};
+var viewMode = 'activity';
+
+function emptyStageBuckets(){
+  var b = [];
+  for(var m=0;m<12;m++){
+    var months = [];
+    for(var t=0;t<3;t++){
+      months.push({budding:0,flowering:0,fruiting:0,vegetative:0,total:0});
+    }
+    b.push(months);
+  }
+  return b;
+}
+
+var currentRegion = 'WA';
+var currentPlace = null;
+var speciesData = [];
+var searchDebounce = null;
+
+function throttle(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
+
+function fetchJSON(url){
+  return fetch(url).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  });
+}
+
+function autocompletePlace(q){
+  return fetchJSON(API+'/places/autocomplete?q='+encodeURIComponent(q)+'&per_page=6')
+    .then(function(d){ return d.results || []; });
+}
+
+function getObsCount(placeId){
+  return fetchJSON(API+'/observations?place_id='+placeId+'&per_page=0&quality_grade=research')
+    .then(function(d){ return d.total_results || 0; });
+}
+
+/* ---------------- scope tabs (parks vs counties) ---------------- */
+var currentScope = 'parks';
+
+function renderScopeTabs(){
+  var wrap = document.getElementById('scopeTabs');
+  wrap.innerHTML = '';
+  [['parks','Parks (WA / OR / BC)'],['counties','US counties (all 50 states)']].forEach(function(pair){
+    var btn = document.createElement('button');
+    btn.className = 'region-tab' + (pair[0]===currentScope ? ' active' : '');
+    btn.textContent = pair[1];
+    btn.onclick = function(){
+      currentScope = pair[0];
+      renderScopeTabs();
+      document.getElementById('parksScope').style.display = currentScope==='parks' ? 'block' : 'none';
+      document.getElementById('countiesScope').style.display = currentScope==='counties' ? 'block' : 'none';
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+/* ---------------- region tabs (parks) ---------------- */
+function renderTabs(){
+  var wrap = document.getElementById('regionTabs');
+  wrap.innerHTML = '';
+  Object.keys(REGIONS).forEach(function(key){
+    var btn = document.createElement('button');
+    btn.className = 'region-tab' + (key===currentRegion ? ' active' : '');
+    btn.textContent = REGIONS[key].label;
+    btn.onclick = function(){ currentRegion = key; renderTabs(); renderPlaceGrid('parkGrid', REGIONS[currentRegion].parks); };
+    wrap.appendChild(btn);
+  });
+}
+
+/* ---------------- US states + flagship counties ---------------- */
+var STATES = [
+  ['AL','Alabama','Jefferson County, Alabama'],['AK','Alaska','Anchorage Municipality, Alaska'],
+  ['AZ','Arizona','Maricopa County, Arizona'],['AR','Arkansas','Pulaski County, Arkansas'],
+  ['CA','California','Los Angeles County, California'],['CO','Colorado','Denver County, Colorado'],
+  ['CT','Connecticut','Fairfield County, Connecticut'],['DE','Delaware','New Castle County, Delaware'],
+  ['FL','Florida','Miami-Dade County, Florida'],['GA','Georgia','Fulton County, Georgia'],
+  ['HI','Hawaii','Honolulu County, Hawaii'],['ID','Idaho','Ada County, Idaho'],
+  ['IL','Illinois','Cook County, Illinois'],['IN','Indiana','Marion County, Indiana'],
+  ['IA','Iowa','Polk County, Iowa'],['KS','Kansas','Johnson County, Kansas'],
+  ['KY','Kentucky','Jefferson County, Kentucky'],['LA','Louisiana','East Baton Rouge Parish, Louisiana'],
+  ['ME','Maine','Cumberland County, Maine'],['MD','Maryland','Montgomery County, Maryland'],
+  ['MA','Massachusetts','Middlesex County, Massachusetts'],['MI','Michigan','Wayne County, Michigan'],
+  ['MN','Minnesota','Hennepin County, Minnesota'],['MS','Mississippi','Hinds County, Mississippi'],
+  ['MO','Missouri','St. Louis County, Missouri'],['MT','Montana','Yellowstone County, Montana'],
+  ['NE','Nebraska','Douglas County, Nebraska'],['NV','Nevada','Clark County, Nevada'],
+  ['NH','New Hampshire','Hillsborough County, New Hampshire'],['NJ','New Jersey','Bergen County, New Jersey'],
+  ['NM','New Mexico','Bernalillo County, New Mexico'],['NY','New York','Kings County, New York'],
+  ['NC','North Carolina','Mecklenburg County, North Carolina'],['ND','North Dakota','Cass County, North Dakota'],
+  ['OH','Ohio','Franklin County, Ohio'],['OK','Oklahoma','Oklahoma County, Oklahoma'],
+  ['OR','Oregon','Multnomah County, Oregon'],['PA','Pennsylvania','Philadelphia County, Pennsylvania'],
+  ['RI','Rhode Island','Providence County, Rhode Island'],['SC','South Carolina','Greenville County, South Carolina'],
+  ['SD','South Dakota','Minnehaha County, South Dakota'],['TN','Tennessee','Shelby County, Tennessee'],
+  ['TX','Texas','Harris County, Texas'],['UT','Utah','Salt Lake County, Utah'],
+  ['VT','Vermont','Chittenden County, Vermont'],['VA','Virginia','Fairfax County, Virginia'],
+  ['WA','Washington','King County, Washington'],['WV','West Virginia','Kanawha County, West Virginia'],
+  ['WI','Wisconsin','Milwaukee County, Wisconsin'],['WY','Wyoming','Laramie County, Wyoming']
+];
+var currentState = 'WA';
+
+function renderStateSelect(){
+  var sel = document.getElementById('stateSelect');
+  sel.innerHTML = '';
+  STATES.forEach(function(s){
+    var opt = document.createElement('option');
+    opt.value = s[0]; opt.textContent = s[1];
+    if(s[0]===currentState) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', function(){
+    currentState = this.value;
+    renderCountyGrid();
+  });
+}
+
+function renderCountyGrid(){
+  var entry = STATES.filter(function(s){ return s[0]===currentState; })[0];
+  renderPlaceGrid('countyGrid', [entry[2]]);
+}
+
+/* ---------------- shortlist grid (shared by parks + counties) ---------------- */
+var placeCardCache = {};
+
+function renderPlaceGrid(containerId, queries){
+  var grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  queries.forEach(function(name){
+    var card = document.createElement('div');
+    card.className = 'park-card';
+    card.innerHTML = '<div class="pname">'+shortName(name)+'</div><div class="pcount loading">checking activity&hellip;</div>';
+    grid.appendChild(card);
+
+    var cacheKey = name;
+    if(placeCardCache[cacheKey]){
+      paintCard(card, placeCardCache[cacheKey]);
+      card.onclick = function(){ selectPark(placeCardCache[cacheKey].id, placeCardCache[cacheKey].display_name || shortName(name)); markSelected(card); };
+    } else {
+      autocompletePlace(name).then(function(results){
+        if(!results.length){ card.querySelector('.pcount').textContent = 'not found'; return; }
+        var best = results[0];
+        return getObsCount(best.id).then(function(count){
+          var info = {id:best.id, display_name:best.display_name, count:count};
+          placeCardCache[cacheKey] = info;
+          paintCard(card, info);
+          card.onclick = function(){ selectPark(info.id, info.display_name || shortName(name)); markSelected(card); };
+        });
+      }).catch(function(){ card.querySelector('.pcount').textContent = 'unavailable'; });
+    }
+  });
+}
+
+function shortName(full){ return full.split(',')[0]; }
+
+function paintCard(card, info){
+  card.querySelector('.pcount').innerHTML = '<b>'+info.count.toLocaleString()+'</b> observations';
+  card.querySelector('.pcount').classList.remove('loading');
+}
+
+function markSelected(card){
+  document.querySelectorAll('.park-card').forEach(function(c){ c.classList.remove('selected'); });
+  card.classList.add('selected');
+}
+
+/* ---------------- search box ---------------- */
+var searchInput = document.getElementById('searchInput');
+var searchResults = document.getElementById('searchResults');
+
+searchInput.addEventListener('input', function(){
+  var q = searchInput.value.trim();
+  clearTimeout(searchDebounce);
+  if(q.length < 3){ searchResults.classList.remove('show'); return; }
+  searchDebounce = setTimeout(function(){
+    autocompletePlace(q).then(function(results){
+      searchResults.innerHTML = '';
+      if(!results.length){
+        searchResults.innerHTML = '<div class="search-result-item">No matches found</div>';
+      } else {
+        results.forEach(function(r){
+          var item = document.createElement('div');
+          item.className = 'search-result-item';
+          item.innerHTML = '<span>'+r.display_name+'</span><span class="meta">'+(r.place_type_name||'')+'</span>';
+          item.onclick = function(){
+            searchResults.classList.remove('show');
+            searchInput.value = r.display_name;
+            document.querySelectorAll('.park-card').forEach(function(c){ c.classList.remove('selected'); });
+            selectPark(r.id, r.display_name);
+          };
+          searchResults.appendChild(item);
+        });
+      }
+      searchResults.classList.add('show');
+    }).catch(function(){});
+  }, 350);
+});
+document.addEventListener('click', function(e){
+  if(!searchResults.contains(e.target) && e.target !== searchInput){ searchResults.classList.remove('show'); }
+});
+
+/* ---------------- park selection + calendar build ---------------- */
+function selectPark(placeId, displayName){
+  currentPlace = {id: placeId, name: displayName};
+  document.getElementById('emptyState').style.display = 'none';
+  var panel = document.getElementById('panel');
+  panel.classList.add('show');
+  document.getElementById('panelTitle').textContent = displayName;
+  document.getElementById('panelLink').href = 'https://www.inaturalist.org/observations?place_id='+placeId+'&quality_grade=research';
+  document.getElementById('panelStats').textContent = 'Loading totals\u2026';
+  document.getElementById('controlsRow').style.display = 'none';
+  document.getElementById('calScroll').style.display = 'none';
+  document.getElementById('legendRow').style.display = 'none';
+  document.getElementById('noteRow').style.display = 'none';
+  document.getElementById('calTable').innerHTML = '';
+  speciesData = [];
+  viewMode = 'activity';
+  document.getElementById('viewMode').value = 'activity';
+
+  panel.scrollIntoView({behavior:'smooth', block:'start'});
+
+  getObsCount(placeId).then(function(total){
+    document.getElementById('panelStats').textContent = total.toLocaleString() + ' research-grade observations recorded here';
+  });
+
+  loadSpeciesForPark(placeId);
+}
+
+function loadSpeciesForPark(placeId){
+  var progressWrap = document.getElementById('progressWrap');
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+  progressWrap.classList.add('show');
+  progressLabel.textContent = 'Fetching species list\u2026';
+  progressFill.style.width = '5%';
+
+  fetchAllSpeciesCounts(placeId).then(function(all){
+    var qualifying = all.filter(function(s){ return s.count > 10; });
+    qualifying.sort(function(a,b){ return b.count - a.count; });
+
+    if(qualifying.length === 0){
+      progressWrap.classList.remove('show');
+      document.getElementById('noteRow').style.display = 'block';
+      document.getElementById('noteRow').textContent = 'No species at this park currently have more than 10 research-grade observations.';
+      return;
+    }
+
+    progressLabel.textContent = 'Building phenology for '+qualifying.length+' species\u2026';
+    speciesData = qualifying.map(function(s){
+      var iconic = s.taxon.iconic_taxon_name || 'unknown';
+      return {
+        id: s.taxon.id,
+        name: s.taxon.preferred_common_name || s.taxon.name,
+        sci: s.taxon.name,
+        iconic: iconic,
+        hasPhenology: iconic === 'Plantae',
+        count: s.count,
+        buckets: null,
+        stageBuckets: null
+      };
+    });
+
+    populateTaxonFilter(speciesData);
+    renderCalendarSkeleton(speciesData);
+    document.getElementById('controlsRow').style.display = 'flex';
+    document.getElementById('calScroll').style.display = 'block';
+    document.getElementById('legendRow').style.display = 'flex';
+    document.getElementById('noteRow').style.display = 'block';
+    document.getElementById('noteRow').textContent = 'Phenology reflects up to 150 sampled research-grade observation dates per species, aggregated across all years to show a typical seasonal pattern. Growth-stage colors use iNaturalist\u2019s community "Plant Phenology" annotations (budding, flowering, fruiting, vegetative) and are only available for plants where observers added them \u2014 coverage varies by species.';
+    renderLegend();
+
+    var i = 0;
+    function next(){
+      if(i >= speciesData.length){
+        progressWrap.classList.remove('show');
+        return;
+      }
+      var sp = speciesData[i];
+      progressLabel.textContent = 'Building phenology for '+sp.name+' ('+(i+1)+'/'+speciesData.length+')\u2026';
+      progressFill.style.width = Math.round(((i+1)/speciesData.length)*100)+'%';
+      fetchPhenology(placeId, sp.id).then(function(result){
+        sp.buckets = result.buckets;
+        sp.stageBuckets = result.stageBuckets;
+        paintRow(sp);
+        i++;
+        throttle(120).then(next);
+      }).catch(function(){
+        sp.buckets = emptyBuckets();
+        sp.stageBuckets = emptyStageBuckets();
+        paintRow(sp);
+        i++;
+        throttle(120).then(next);
+      });
+    }
+    next();
+  }).catch(function(err){
+    progressWrap.classList.remove('show');
+    document.getElementById('noteRow').style.display = 'block';
+    document.getElementById('noteRow').textContent = 'Could not load species data: '+err.message;
+  });
+}
+
+function fetchAllSpeciesCounts(placeId){
+  var out = [];
+  function page(p){
+    var url = API+'/observations/species_counts?place_id='+placeId+'&quality_grade=research&per_page=500&page='+p;
+    return fetchJSON(url).then(function(d){
+      out = out.concat(d.results || []);
+      if((d.results||[]).length === 500 && p < 4){
+        return page(p+1);
+      }
+      return out;
+    });
+  }
+  return page(1);
+}
+
+function emptyBuckets(){
+  var b = [];
+  for(var m=0;m<12;m++){ b.push([0,0,0]); }
+  return b;
+}
+
+function fetchPhenology(placeId, taxonId){
+  var url = API+'/observations?place_id='+placeId+'&taxon_id='+taxonId+'&quality_grade=research&per_page=150&order=desc&order_by=observed_on';
+  return fetchJSON(url).then(function(d){
+    var buckets = emptyBuckets();
+    var stageBuckets = emptyStageBuckets();
+    (d.results||[]).forEach(function(obs){
+      if(!obs.observed_on) return;
+      var parts = obs.observed_on.split('-');
+      if(parts.length < 3) return;
+      var month = parseInt(parts[1],10) - 1;
+      var day = parseInt(parts[2],10);
+      if(month < 0 || month > 11) return;
+      var tercile = day <= 10 ? 0 : (day <= 20 ? 1 : 2);
+      buckets[month][tercile]++;
+
+      var cell = stageBuckets[month][tercile];
+      cell.total++;
+      (obs.annotations||[]).forEach(function(a){
+        if(a.controlled_attribute_id === PHENOLOGY_ATTR_ID){
+          var stage = PHENOLOGY_VALUE_MAP[a.controlled_value_id];
+          if(stage){ cell[stage]++; }
+        }
+      });
+    });
+    return {buckets: buckets, stageBuckets: stageBuckets};
+  });
+}
+
+/* ---------------- calendar rendering ---------------- */
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function renderCalendarSkeleton(list){
+  var table = document.getElementById('calTable');
+  var thead = document.createElement('thead');
+
+  var rowMonths = document.createElement('tr');
+  var thSp = document.createElement('th');
+  thSp.className = 'sp-col';
+  thSp.textContent = 'Species';
+  rowMonths.appendChild(thSp);
+  MONTHS.forEach(function(m){
+    var th = document.createElement('th');
+    th.className = 'month-head';
+    th.colSpan = 3;
+    th.textContent = m;
+    rowMonths.appendChild(th);
+  });
+  thead.appendChild(rowMonths);
+
+  var rowSub = document.createElement('tr');
+  rowSub.className = 'sub';
+  var thBlank = document.createElement('th');
+  thBlank.className = 'sp-col';
+  rowSub.appendChild(thBlank);
+  for(var m=0;m<12;m++){
+    ['1-10','11-20','21-31'].forEach(function(label, idx){
+      var th = document.createElement('th');
+      if(idx===0) th.style.borderLeft = '1px solid var(--line)';
+      th.textContent = label;
+      rowSub.appendChild(th);
+    });
+  }
+  thead.appendChild(rowSub);
+  table.innerHTML = '';
+  table.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  tbody.id = 'calBody';
+  table.appendChild(tbody);
+
+  list.forEach(function(sp){
+    var tr = document.createElement('tr');
+    tr.className = 'row-loading';
+    tr.setAttribute('data-taxon-id', sp.id);
+    var tdName = document.createElement('td');
+    tdName.className = 'sp-col';
+    tdName.innerHTML = '<span class="sp-taxon-dot" style="background:'+taxonColor(sp.iconic)+'"></span>'+
+      '<span class="sp-name">'+sp.name+'</span>'+
+      '<span class="sp-sci">'+sp.sci+'</span>'+
+      '<span class="sp-count">'+sp.count.toLocaleString()+' observations</span>';
+    tr.appendChild(tdName);
+    for(var m=0;m<12;m++){
+      for(var t=0;t<3;t++){
+        var td = document.createElement('td');
+        td.className = 'cell' + (t===0 ? ' month-start' : '');
+        var fill = document.createElement('div');
+        fill.className = 'cell-fill cell-empty';
+        td.appendChild(fill);
+        tr.appendChild(td);
+      }
+    }
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('speciesCountTag').textContent = list.length + ' species with >10 observations';
+}
+
+function paintRow(sp){
+  var tr = document.querySelector('tr[data-taxon-id="'+sp.id+'"]');
+  if(!tr) return;
+  tr.classList.remove('row-loading');
+  if(viewMode === 'phenology'){
+    paintRowStage(sp, tr);
+  } else {
+    paintRowActivity(sp, tr);
+  }
+}
+
+function paintRowActivity(sp, tr){
+  var max = 0;
+  sp.buckets.forEach(function(m){ m.forEach(function(v){ if(v>max) max=v; }); });
+  var cells = tr.querySelectorAll('td.cell');
+  var idx = 0;
+  var color = taxonColor(sp.iconic);
+  for(var m=0;m<12;m++){
+    for(var t=0;t<3;t++){
+      var val = sp.buckets[m][t];
+      var fill = cells[idx].querySelector('.cell-fill');
+      if(val === 0 || max === 0){
+        fill.className = 'cell-fill cell-empty';
+        cells[idx].title = '';
+      } else {
+        var ratio = val / max;
+        var opacity = 0.18 + ratio * 0.75;
+        fill.className = 'cell-fill';
+        fill.style.background = color;
+        fill.style.opacity = opacity.toFixed(2);
+        cells[idx].title = sp.name+': '+val+' seen in this window';
+      }
+      idx++;
+    }
+  }
+}
+
+function paintRowStage(sp, tr){
+  var cells = tr.querySelectorAll('td.cell');
+  var idx = 0;
+  if(!sp.hasPhenology || !sp.stageBuckets){
+    for(var i=0;i<36;i++){
+      var fillN = cells[idx].querySelector('.cell-fill');
+      fillN.className = 'cell-fill cell-empty';
+      cells[idx].title = sp.hasPhenology ? '' : (sp.name+': growth-stage annotations only apply to plants');
+      idx++;
+    }
+    return;
+  }
+  for(var m=0;m<12;m++){
+    for(var t=0;t<3;t++){
+      var cellData = sp.stageBuckets[m][t];
+      var fill = cells[idx].querySelector('.cell-fill');
+      var dominant = null, dominantCount = 0, annotatedTotal = 0;
+      PHENOLOGY_STAGES.forEach(function(stage){
+        annotatedTotal += cellData[stage];
+        if(cellData[stage] > dominantCount){ dominantCount = cellData[stage]; dominant = stage; }
+      });
+      if(!dominant || cellData.total === 0){
+        fill.className = 'cell-fill cell-empty';
+        cells[idx].title = '';
+      } else {
+        var ratio = dominantCount / cellData.total;
+        var opacity = 0.25 + ratio * 0.65;
+        fill.className = 'cell-fill';
+        fill.style.background = PHENOLOGY_COLORS[dominant];
+        fill.style.opacity = opacity.toFixed(2);
+        cells[idx].title = sp.name+': '+PHENOLOGY_LABELS[dominant]+' in '+dominantCount+' of '+cellData.total+' sampled observations this window';
+      }
+      idx++;
+    }
+  }
+}
+
+document.getElementById('viewMode').addEventListener('change', function(){
+  viewMode = this.value;
+  speciesData.forEach(function(sp){
+    if(sp.buckets){ paintRow(sp); }
+  });
+  renderLegend();
+});
+
+/* ---------------- filters / sort ---------------- */
+function populateTaxonFilter(list){
+  var sel = document.getElementById('filterTaxon');
+  var seen = {};
+  list.forEach(function(s){ seen[s.iconic] = true; });
+  sel.innerHTML = '<option value="">All groups</option>';
+  Object.keys(seen).sort().forEach(function(t){
+    var opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    sel.appendChild(opt);
+  });
+}
+
+function applyFilters(){
+  var nameQ = document.getElementById('filterName').value.trim().toLowerCase();
+  var taxonQ = document.getElementById('filterTaxon').value;
+  var sortMode = document.getElementById('sortMode').value;
+
+  var visible = speciesData.filter(function(s){
+    var matchName = !nameQ || s.name.toLowerCase().indexOf(nameQ) !== -1 || s.sci.toLowerCase().indexOf(nameQ) !== -1;
+    var matchTaxon = !taxonQ || s.iconic === taxonQ;
+    return matchName && matchTaxon;
+  });
+
+  if(sortMode === 'count'){
+    visible.sort(function(a,b){ return b.count - a.count; });
+  } else if(sortMode === 'name'){
+    visible.sort(function(a,b){ return a.name.localeCompare(b.name); });
+  } else if(sortMode === 'peak'){
+    visible.sort(function(a,b){ return peakMonth(a) - peakMonth(b); });
+  }
+
+  var tbody = document.getElementById('calBody');
+  var idSet = {};
+  visible.forEach(function(s){ idSet[s.id] = true; });
+  Array.prototype.slice.call(tbody.children).forEach(function(tr){
+    var id = tr.getAttribute('data-taxon-id');
+    tr.style.display = idSet[id] ? '' : 'none';
+  });
+  visible.forEach(function(s){
+    var tr = document.querySelector('tr[data-taxon-id="'+s.id+'"]');
+    if(tr) tbody.appendChild(tr);
+  });
+  document.getElementById('speciesCountTag').textContent = visible.length + ' of ' + speciesData.length + ' species shown';
+}
+
+function peakMonth(sp){
+  if(!sp.buckets) return 12;
+  var max = -1, month = 12;
+  sp.buckets.forEach(function(b,i){
+    var sum = b[0]+b[1]+b[2];
+    if(sum > max){ max = sum; month = i; }
+  });
+  return month;
+}
+
+document.getElementById('filterName').addEventListener('input', applyFilters);
+document.getElementById('filterTaxon').addEventListener('change', applyFilters);
+document.getElementById('sortMode').addEventListener('change', applyFilters);
+
+/* ---------------- legend ---------------- */
+function renderLegend(){
+  var label = document.getElementById('legendLabel');
+  var sw = document.getElementById('intensitySwatches');
+  var tk = document.getElementById('taxonKey');
+  sw.innerHTML = '';
+  tk.innerHTML = '';
+
+  if(viewMode === 'phenology'){
+    label.textContent = 'Growth stage (plants only, from community annotations):';
+    PHENOLOGY_STAGES.forEach(function(stage){
+      var span = document.createElement('span');
+      span.innerHTML = '<span class="sp-taxon-dot" style="background:'+PHENOLOGY_COLORS[stage]+'"></span>'+PHENOLOGY_LABELS[stage];
+      tk.appendChild(span);
+    });
+  } else {
+    label.textContent = "Intensity (share of this species' observations):";
+    [0.18,0.4,0.6,0.8,0.93].forEach(function(op){
+      var d = document.createElement('div');
+      d.className = 'sw';
+      d.style.background = '#4B5D3A';
+      d.style.opacity = op;
+      sw.appendChild(d);
+    });
+    var used = {};
+    speciesData.forEach(function(s){ used[s.iconic] = true; });
+    Object.keys(used).sort().forEach(function(t){
+      var span = document.createElement('span');
+      span.innerHTML = '<span class="sp-taxon-dot" style="background:'+taxonColor(t)+'"></span>'+t;
+      tk.appendChild(span);
+    });
+  }
+}
+
+/* ---------------- init ---------------- */
+renderScopeTabs();
+renderTabs();
+renderPlaceGrid('parkGrid', REGIONS[currentRegion].parks);
+renderStateSelect();
+renderCountyGrid();
+
+})();
+</script>
+</body>
+</html>
